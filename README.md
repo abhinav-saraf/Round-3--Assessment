@@ -56,7 +56,7 @@ Use VPC endpoints,
 Minimize NAT Gateway usage.
 7.	Enable Log retention policies as CloudWatch logs often grow unnoticed:
 Reduces log storage costs
-───────────────────────────────────────────────────────────────────────────────
+────────────────────────────────────────────────────────────────────────────
 Expected Cost Reduction Summary:
 Optimisation              Saving
 RDS schedule stop/start    15%
