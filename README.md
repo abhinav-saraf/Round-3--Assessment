@@ -89,7 +89,7 @@ File: .github/workflows/deploy.yml
 
 name: Build and Deploy to ECS 
 
-# Trigger workflow whenever code is pushed to the main branch
+#Trigger workflow whenever code is pushed to the main branch
 on:
   push:
     branches:
