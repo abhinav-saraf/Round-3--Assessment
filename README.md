@@ -87,73 +87,73 @@ A working GitHub Actions YAML file that:
 Solution:
 File: .github/workflows/deploy.yml
 
-name: Build and Deploy to ECS 
-
-#Trigger workflow whenever code is pushed to the main branch
-on:
-  push:
-    branches:
-      - main
-
-jobs:
-  deploy:
-    name: Build, Push to ECR, and Deploy to ECS
-    runs-on: ubuntu-latest
-
-    env:
-      AWS_REGION: us-east-1
-      ECR_REPOSITORY: my-nodejs-backend
-      ECS_CLUSTER: my-ecs-cluster
-      ECS_SERVICE: my-ecs-service
+    name: Build and Deploy to ECS 
     
-    steps:
-      
-      # Step 1: Download 	repository source code
-      - name: Checkout source code
-        uses: actions/checkout@v4
+    #Trigger workflow whenever code is pushed to the main branch
+    on:
+      push:
+        branches:
+          - main
+    
+    jobs:
+      deploy:
+        name: Build, Push to ECR, and Deploy to ECS
+        runs-on: ubuntu-latest
+    
+        env:
+          AWS_REGION: us-east-1
+          ECR_REPOSITORY: my-nodejs-backend
+          ECS_CLUSTER: my-ecs-cluster
+          ECS_SERVICE: my-ecs-service
         
-      # Step 2: Configure AWS Credentials
-      # Store these values in GitHub Repository Secrets:
-      # AWS_ACCESS_KEY_ID
-      # AWS_SECRET_ACCESS_KEY
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+        steps:
           
-      # Step 3: Authenticate Docker to Amazon ECR
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
-
-      # Step 4: Create a Docker Image tag using the Git commit SHA
-      - name: Generate Image Tag
-        run: echo "IMAGE_TAG=${GITHUB_SHA}" >> $GITHUB_ENV
-
-      # Step 5: Build the Docker Image
-      - name: Build Docker Image
-        run: docker build -t ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest .
-
-      # Step 6: Push the Docker Image to ECR
-      - name: Push Docker Image to ECR
-        run: docker push ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
-
-      # Step 7: Force ECS Service to Start a New Deployment
-      # ECS will pull the latest image and replace running tasks
-      - name: Deploy to ECS
-        run: aws ecs update-service --cluster ${{ env.ECS_CLUSTER }} --service ${{ env.ECS_SERVICE }} --force-new-deployment
-
-      # Step 8: Wait until deployment finishes successfully
-      - name: Wait for ECS Deployment
-        run: aws ecs wait services-stable --cluster ${{ env.ECS_CLUSTER }} --services ${{ env.ECS_SERVICE }}
-
-      # Step 9: Output deployment information
-      - name: Deployment Complete
-        run: |
-          echo "Deployment successful"
-          echo "Image Tag: ${IMAGE_TAG}"
+          # Step 1: Download 	repository source code
+          - name: Checkout source code
+            uses: actions/checkout@v4
+            
+          # Step 2: Configure AWS Credentials
+          # Store these values in GitHub Repository Secrets:
+          # AWS_ACCESS_KEY_ID
+          # AWS_SECRET_ACCESS_KEY
+          - name: Configure AWS Credentials
+            uses: aws-actions/configure-aws-credentials@v4
+            with:
+              aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+              aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+              aws-region: ${{ env.AWS_REGION }}
+              
+          # Step 3: Authenticate Docker to Amazon ECR
+          - name: Login to Amazon ECR
+            id: login-ecr
+            uses: aws-actions/amazon-ecr-login@v2
+    
+          # Step 4: Create a Docker Image tag using the Git commit SHA
+          - name: Generate Image Tag
+            run: echo "IMAGE_TAG=${GITHUB_SHA}" >> $GITHUB_ENV
+    
+          # Step 5: Build the Docker Image
+          - name: Build Docker Image
+            run: docker build -t ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest .
+    
+          # Step 6: Push the Docker Image to ECR
+          - name: Push Docker Image to ECR
+            run: docker push ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
+    
+          # Step 7: Force ECS Service to Start a New Deployment
+          # ECS will pull the latest image and replace running tasks
+          - name: Deploy to ECS
+            run: aws ecs update-service --cluster ${{ env.ECS_CLUSTER }} --service ${{ env.ECS_SERVICE }} --force-new-deployment
+    
+          # Step 8: Wait until deployment finishes successfully
+          - name: Wait for ECS Deployment
+            run: aws ecs wait services-stable --cluster ${{ env.ECS_CLUSTER }} --services ${{ env.ECS_SERVICE }}
+    
+          # Step 9: Output deployment information
+          - name: Deployment Complete
+            run: |
+              echo "Deployment successful"
+              echo "Image Tag: ${IMAGE_TAG}"
 
 
 ───────────────────────────────────────────────────────────────────────────────────────────
