@@ -15,19 +15,19 @@ Auto Start/Stop Schedule for the RDS:
 
 Stop RDS (night + weekends):
 
-#!/bin/bash
-DB_INSTANCE_ID="staging-db"
-echo "Stopping RDS instance: $DB_INSTANCE_ID"
-aws rds stop-db-instance --db-instance-identifier $DB_INSTANCE_ID
-echo "Stop request submitted."
+    #!/bin/bash
+    DB_INSTANCE_ID="staging-db"
+    echo "Stopping RDS instance: $DB_INSTANCE_ID"
+    aws rds stop-db-instance --db-instance-identifier $DB_INSTANCE_ID
+    echo "Stop request submitted."
 
 Start RDS (weekday mornings):
 
-#!/bin/bash
-DB_INSTANCE_ID="staging-db"
-echo "Starting RDS instance: $DB_INSTANCE_ID"
-aws rds start-db-instance --db-instance-identifier $DB_INSTANCE_ID
-echo "Start request submitted."
+    #!/bin/bash
+    DB_INSTANCE_ID="staging-db"
+    echo "Starting RDS instance: $DB_INSTANCE_ID"
+    aws rds start-db-instance --db-instance-identifier $DB_INSTANCE_ID
+    echo "Start request submitted."
 
 Example Cron Schedule:
 
