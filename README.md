@@ -183,12 +183,6 @@ Solution:
    4. Security group changes
    5. New task definition deployment issues
 
-   The Objective is to determine whether:
-   * ALB cannot reach tasks
-   * Tasks are failing health checks
-   * ECS deployed an incorrect configuration
-   * Traffic routing is inconsistent
-
 ─────────────────────────────────────────────────────────────────────────────────────────
 
 Step 1: Check ALB Target Health  
