@@ -1,14 +1,14 @@
 # Round-3--Assessment
-───────────────────────────────────────────────────────────────────────────────────────────
+─────────────────────────────────────────────────────────────────────────────────────────
 # TASK 1 — AWS Infrastructure & Cost Optimization
-───────────────────────────────────────────────────────────────────────────────────────────
+─────────────────────────────────────────────────────────────────────────────────────────
 Your team has a staging environment on AWS running 24/7 with ECS Fargate services, an RDS instance, and an ALB. The monthly bill has crossed $600 and your manager wants it cut by at least 40% without breaking the environment.
 
 Deliverable:
 * A shell script or Terraform snippet that implements an auto start/stop schedule for the RDS instance (stop nights + weekends)
 * A short written list (5–7 points) of additional cost optimisation steps across ECS, ALB, and data transfer
 
-───────────────────────────────────────────────────────────────────────────────────────────
+─────────────────────────────────────────────────────────────────────────────────────────
 
 Solution:
 Auto Start/Stop Schedule for the RDS:
@@ -39,7 +39,7 @@ Stop every weekday @8PM:
 Stop Friday night and keep stopped through weekend:
 0 20 * * 5 /stop-rds.sh
 
-───────────────────────────────────────────────────────────────────────────────────────────
+─────────────────────────────────────────────────────────────────────────────────────────
 
 Additional Cost Optimization Steps:
 
@@ -60,7 +60,7 @@ Minimize NAT Gateway usage.
 7.	Enable Log retention policies as CloudWatch logs often grow unnoticed:
 Reduces log storage costs
 
-────────────────────────────────────────────────────────────────────────────────────────
+──────────────────────────────────────────────────────────────────────────────────────
 
 Expected Cost Reduction Summary:
 Optimisation              Saving
@@ -75,9 +75,9 @@ Log retention cleanup      1%
 Combined saving can realistically exceed the required 40% cut in cost without breaking the current staging environment during working hours.
 
 
-───────────────────────────────────────────────────────────────────────────────────────────
+─────────────────────────────────────────────────────────────────────────────────────────
 # TASK 2 — CI/CD Pipeline Design
-───────────────────────────────────────────────────────────────────────────────────────────
+─────────────────────────────────────────────────────────────────────────────────────────
 Scenario:
 A Node.js backend application is currently deployed manually via SSH. A GitHub repo, ECR registry, and ECS Fargate cluster are already in place. You've been asked to set up a proper CI/CD pipeline from scratch.
 
@@ -88,7 +88,7 @@ A working GitHub Actions YAML file that:
 * Updates the ECS service to force a new deployment
 * Includes inline comments explaining each step
 
-───────────────────────────────────────────────────────────────────────────────────────────
+─────────────────────────────────────────────────────────────────────────────────────────
 
 Solution:
 File: .github/workflows/deploy.yml
@@ -162,9 +162,9 @@ File: .github/workflows/deploy.yml
               echo "Image Tag: ${IMAGE_TAG}"
 
 
-───────────────────────────────────────────────────────────────────────────────────────────
+─────────────────────────────────────────────────────────────────────────────────────────
 # TASK 3 — Incident Troubleshooting (Containers + Networking)
-───────────────────────────────────────────────────────────────────────────────────────────
+─────────────────────────────────────────────────────────────────────────────────────────
 Scenario:
 A containerised application on ECS Fargate is returning 503 Service Unavailable intermittently via the ALB. Tasks show as RUNNING, CloudWatch shows no CPU/memory spikes, and app logs look clean. The issue started after a recent deployment.
 
@@ -175,7 +175,7 @@ A step-by-step troubleshooting runbook covering:
 * At least 3 plausible root causes with confirmation/ruling-out steps
 * How you'd roll back if needed
 
-───────────────────────────────────────────────────────────────────────────────────────────
+─────────────────────────────────────────────────────────────────────────────────────────
 
 Solution:
 1. Initial Triage - Where to look first:
@@ -192,7 +192,7 @@ Solution:
    * ECS deployed an incorrect configuration
    * Traffic routing is inconsistent
 
-───────────────────────────────────────────────────────────────────────────────────────────
+─────────────────────────────────────────────────────────────────────────────────────────
 
 Step 1: Check ALB Target Health
 Reason:  An ALB returns 503 when it has no healthy targets available for a request
@@ -278,7 +278,7 @@ Check:   * Slow startup
          * Database connection delays
          * Dependancy initialization failures
          
-───────────────────────────────────────────────────────────────────────────────────────────
+─────────────────────────────────────────────────────────────────────────────────────────
 
 2. Pausible Root Causes
 Root Cause 1: Health Check Endpoint Changed
@@ -315,7 +315,7 @@ Fix: * Increase Health check grace period
      * Health check timeout
      * Startup readiness handling
 
-───────────────────────────────────────────────────────────────────────────────────────────
+─────────────────────────────────────────────────────────────────────────────────────────
 
 3. RollBack Procedure for Redeploy Previous ECR Image
 * Identify known-good image: aws ecr describe-images --repository-name my-app
