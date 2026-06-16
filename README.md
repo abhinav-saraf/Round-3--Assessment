@@ -313,7 +313,7 @@ Fix: * Increase Health check grace period
 
 ─────────────────────────────────────────────────────────────────────────────────────────
 
-3. RollBack Procedure for Redeploy Previous ECR Image  
+3. RollBack Procedure: Redeploy Previous ECR Image  
 * Identify known-good image: aws ecr describe-images --repository-name my-app 
 * Update task definition to use previous image tag.  
 * Register new version: aws ecs register-task-definition  
