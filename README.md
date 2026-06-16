@@ -63,14 +63,14 @@ Reduces log storage costs
 ──────────────────────────────────────────────────────────────────────────────────────
 
 Expected Cost Reduction Summary:
-Optimisation              Saving  
-RDS schedule stop/start    15%  
-ECS task scheduling        10%  
-Fargate Spot               10%  
-Right-sizing ECS resources 10%  
-ALB consolidation	       2%  
-Data transfer optimisation 2%  
-Log retention cleanup      1%  
+Optimisation |              Saving  
+RDS schedule stop/start |   15%  
+ECS task scheduling |       10%  
+Fargate Spot |              10%  
+Right-sizing ECS resources | 10%  
+ALB consolidation	       | 2%  
+Data transfer optimisation | 2%  
+Log retention cleanup      | 1%  
 
 Combined saving can realistically exceed the required 40% cut in cost without breaking the current staging environment during working hours.
 
