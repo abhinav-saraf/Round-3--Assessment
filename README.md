@@ -195,7 +195,7 @@ Solution:
 ─────────────────────────────────────────────────────────────────────────────────────────
 
 Step 1: Check ALB Target Health  
-Reason:  An ALB returns 503 when it has no healthy targets available for a request  
+An ALB returns 503 when it has no healthy targets available for a request  
 AWS CLI: aws elbv2 describe-target-health --target-group-arn <TARGET_GROUP_ARN>  
 Console: AWS Console > EC2 > Target Groups > Targets  
 Check:  * Healthy target counts  
@@ -203,7 +203,7 @@ Check:  * Healthy target counts
         * Health status reason codes  
 
 Step 2: Verify ECS Service Events  
-Reason:  ECS service events often immediately reveal deployment failures.  
+ECS service events often immediately reveal deployment failures.  
 AWS CLI: aws ecs describe-services --cluster my-cluster --services my-service  
 Console: ECS > Cluster > Service > Events  
 Check:   * Failed targets registration  
@@ -212,7 +212,7 @@ Check:   * Failed targets registration
          * Insufficient resources  
 
 Step 3: Compare Current vs Previous Task definition
-Reason:  Incident started after deployment. Most ECS outages originate from task definition changes.  
+Incident started after deployment. Most ECS outages originate from task definition changes.  
 AWS CLI: Current revision - aws ecs describe-services --cluster my-cluster --services my-service  
          Inspect task definition: aws ecs describe-task-definition --task-definition my-task:42  
          Compare against previous revision: aws ecs describe-task-definition --task-definition my-task:41  
@@ -223,7 +223,7 @@ Check:   * Container port changes
          * Startup command changes  
 
 Step 4: Validate ALB Health Check Configuration  
-Reason:  Deployment may have changed the application path/port.  
+Deployment may have changed the application path/port.  
 AWS CLI: aws elbv2 describe-target-groups --target-group-arns <TARGET_GROUP_ARN>  
 Check:   * Health check path  
          * Health check port  
@@ -232,7 +232,7 @@ Check:   * Health check path
          * Timeout  
 
 Step 5: Verify Port Mappings  
-Reason:  most common post-deployment issues is a mismatched ECS container port, Application listening port, or Target group port.  
+Most common post-deployment issues is a mismatched ECS container port, Application listening port, or Target group port.  
 AWS CLI: aws ecs describe-task-definition --task-defnition my-task:42  
 Example: "portMappings": [  
            {  
@@ -244,7 +244,7 @@ Check:   application actually listens on:
 Expected: 0.0.0.0:3000  
 
 Step 6: Check Security Groups:  
-Reason:  Tasks may be healthy internally but unreachable from ALB.  
+Tasks may be healthy internally but unreachable from ALB.  
 ALB Security Group: Must allow Inbound - 80/443 from internet  
 ECS Task Security group: Must allow Inbound - Application port source (ALB Security group)  
 AWS CLI: aws ec2 describe-security-groups --group-ids sg-xxxx  
@@ -252,7 +252,7 @@ Check:   * ALB SG > ECS SG allowed
          * No recent changes  
 
 Step 7: Check ALB Access Logs  
-Reason: Confirms exactly why requests fail. Enables ALB access logs if not already enabled.  
+Confirms exactly why requests fail. Enables ALB access logs if not already enabled.  
 Check:  target_status_code  
         elb_status_code  
 Examples: 503 - TargetConnectionError  
@@ -260,17 +260,15 @@ Examples: 503 - TargetConnectionError
 These immediately narrow the investigation.  
 
 Step 8: Inspect ECS Task Networking  
-Reason:  Fargate uses aws vpc networking. Deployment may have altered: * Subnets  
-                                                                       * Route tables  
-                                                                       * Security groups  
+Fargate uses aws vpc networking. Deployment may have altered: Subnets, Route tables, Security groups  
 AWS CLI: aws ecs describe-tasks --cluster my-cluster --tasks <TASK_ID>  
 Check:   * Correct subnet  
          * Correct security group  
          * ENI attached successfully  
 
 Step 9: Validate Application Readiness  
-Reason:  Container may start successfully but not actually be ready  
-         ECS = Running, but ALB health check fail intermittently  
+Container may start successfully but not actually be ready  
+ECS = Running, but ALB health check fail intermittently  
 AWS CLI: aws logs tail /ecs/my-app --follow  
 Check:   * Slow startup  
          * Database connection delays  
