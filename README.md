@@ -32,12 +32,12 @@ Start RDS (weekday mornings):
 
 Example Cron Schedule:
 
-Start every weekday @ 8AM:  
-0 8 * * 1 - 5 /stop-rds.sh  
-Stop every weekday @8PM:  
-0 20 * * 1 -5 /stop-rds.sh  
-Stop Friday night and keep stopped through weekend:  
-0 20 * * 5 /stop-rds.sh  
+    # Start every weekday @ 8AM:  
+    0 8 * * 1-5 /stop-rds.sh  
+    # Stop every weekday @ 8PM:  
+    0 20 * * 1-5 /stop-rds.sh  
+    # Stop Friday night and keep stopped through weekend:  
+    0 20 * * 5 /stop-rds.sh  
 
 ─────────────────────────────────────────────────────────────────────────────────────────
 
