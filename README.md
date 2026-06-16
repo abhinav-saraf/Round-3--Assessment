@@ -10,7 +10,7 @@ Deliverable:
 
 ─────────────────────────────────────────────────────────────────────────────────────────
 
-Solution:
+Solution:  
 Auto Start/Stop Schedule for the RDS:
 *Shell script (AWS CLI) is executed from a scheduled EC2 instance or CI/CD pipeline.
 
@@ -32,45 +32,45 @@ Start RDS (weekday mornings):
 
 Example Cron Schedule:
 
-Start every weekday @ 8AM:
-0 8 * * 1 - 5 /stop-rds.sh
-Stop every weekday @8PM:
-0 20 * * 1 -5 /stop-rds.sh
-Stop Friday night and keep stopped through weekend:
-0 20 * * 5 /stop-rds.sh
+Start every weekday @ 8AM:  
+0 8 * * 1 - 5 /stop-rds.sh  
+Stop every weekday @8PM:  
+0 20 * * 1 -5 /stop-rds.sh  
+Stop Friday night and keep stopped through weekend:  
+0 20 * * 5 /stop-rds.sh  
 
 ─────────────────────────────────────────────────────────────────────────────────────────
 
 Additional Cost Optimization Steps:
 
-1.	Scale ECS Fargate Tasks by Schedule and Run fewer tasks during non-working hours:
+1.	Scale ECS Fargate Tasks by Schedule and Run fewer tasks during non-working hours:  
 Saving 30% more ECS compute costs.
-2.	Use Fargate Spot for non-critical staging workloads:
+2.	Use Fargate Spot for non-critical staging workloads:  
 Upto 70% less compute cost compared with std Fargate.
-3.	Right-size CPU and Memory allocations and review ECS task definitions:
+3.	Right-size CPU and Memory allocations and review ECS task definitions:  
 CloudWatch metrics to reduce CPU and Memory, saving 20% more cost.
-4.	Shut Down ECS services outside working hours if staging is not needed overnight. Restart in the morning:
+4.	Shut Down ECS services outside working hours if staging is not needed overnight. Restart in the morning:  
 Saving nearing 100% of ECS runtime costs during off-hours.
-5.	Remove unused ALBs and check whether multiple staging apps can share one ALB using host-based/path-based routing:
+5.	Remove unused ALBs and check whether multiple staging apps can share one ALB using host-based/path-based routing:  
 Eliminates duplicate ALB charges and reduces LCU costs.
-6.	Reduce Data transfer charges:
-Keep ECS and RDS in the same AZ when acceptable for staging,
-Use VPC endpoints, 
+6.	Reduce Data transfer charges:  
+Keep ECS and RDS in the same AZ when acceptable for staging,  
+Use VPC endpoints,  
 Minimize NAT Gateway usage.
-7.	Enable Log retention policies as CloudWatch logs often grow unnoticed:
+7.	Enable Log retention policies as CloudWatch logs often grow unnoticed:  
 Reduces log storage costs
 
 ──────────────────────────────────────────────────────────────────────────────────────
 
 Expected Cost Reduction Summary:
-Optimisation              Saving
-RDS schedule stop/start    15%
-ECS task scheduling        10%
-Fargate Spot               10%
-Right-sizing ECS resources 10%
-ALB consolidation	         2%
-Data transfer optimisation 2%
-Log retention cleanup      1%
+Optimisation              Saving  
+RDS schedule stop/start    15%  
+ECS task scheduling        10%  
+Fargate Spot               10%  
+Right-sizing ECS resources 10%  
+ALB consolidation	       2%  
+Data transfer optimisation 2%  
+Log retention cleanup      1%  
 
 Combined saving can realistically exceed the required 40% cut in cost without breaking the current staging environment during working hours.
 
@@ -78,10 +78,10 @@ Combined saving can realistically exceed the required 40% cut in cost without br
 ─────────────────────────────────────────────────────────────────────────────────────────
 # TASK 2 — CI/CD Pipeline Design
 ─────────────────────────────────────────────────────────────────────────────────────────
-Scenario:
+Scenario:  
 A Node.js backend application is currently deployed manually via SSH. A GitHub repo, ECR registry, and ECS Fargate cluster are already in place. You've been asked to set up a proper CI/CD pipeline from scratch.
 
-Deliverable:
+Deliverable:  
 A working GitHub Actions YAML file that:
 * Triggers on push to main
 * Builds and pushes a Docker image to ECR with a git SHA tag
@@ -177,7 +177,7 @@ A step-by-step troubleshooting runbook covering:
 
 ─────────────────────────────────────────────────────────────────────────────────────────
 
-Solution:
+Solution:  
 1. Initial Triage - Where to look first:
    Since the issue appeared immidiately after the deployment and tasks remain healthy from an ECS perspective, the first sus is:
    1. ALB Target Group health issues
@@ -194,131 +194,129 @@ Solution:
 
 ─────────────────────────────────────────────────────────────────────────────────────────
 
-Step 1: Check ALB Target Health
-Reason:  An ALB returns 503 when it has no healthy targets available for a request
-AWS CLI: aws elbv2 describe-target-health --target-group-arn <TARGET_GROUP_ARN>
-Console: AWS Console > EC2 > Target Groups > Targets
-Check:   Healthy target counts
-         Unhealthy target counts
-         Health status reason codes
+Step 1: Check ALB Target Health  
+Reason:  An ALB returns 503 when it has no healthy targets available for a request  
+AWS CLI: aws elbv2 describe-target-health --target-group-arn <TARGET_GROUP_ARN>  
+Console: AWS Console > EC2 > Target Groups > Targets  
+Check:  * Healthy target counts  
+        * Unhealthy target counts  
+        * Health status reason codes  
 
-Step 2: Verify ECS Service Events
-Reason:  ECS service events often immediately reveal deployment failures.
-AWS CLI: aws ecs describe-services --cluster my-cluster --services my-service
-Console: ECS > Cluster > Service > Events
-Check:   * Failed targets registration
-         * Health check failures
-         * Task replacement loops
-         * Insufficient resources
+Step 2: Verify ECS Service Events  
+Reason:  ECS service events often immediately reveal deployment failures.  
+AWS CLI: aws ecs describe-services --cluster my-cluster --services my-service  
+Console: ECS > Cluster > Service > Events  
+Check:   * Failed targets registration  
+         * Health check failures  
+         * Task replacement loops  
+         * Insufficient resources  
 
 Step 3: Compare Current vs Previous Task definition
-Reason:  Incident started after deployment. Most ECS outages originate from task definition changes.
-AWS CLI: Current revision - aws ecs describe-services --cluster my-cluster --services my-service
-         Inspect task definition: aws ecs describe-task-definition --task-definition my-task:42
-         Compare against previous revision: aws ecs describe-task-definition --task-definition my-task:41
-Check:   * Container port changes
-         * Health endpoint changes
-         * Environment variable changes
-         * Secrets changes
-         * Startup command changes
+Reason:  Incident started after deployment. Most ECS outages originate from task definition changes.  
+AWS CLI: Current revision - aws ecs describe-services --cluster my-cluster --services my-service  
+         Inspect task definition: aws ecs describe-task-definition --task-definition my-task:42  
+         Compare against previous revision: aws ecs describe-task-definition --task-definition my-task:41  
+Check:   * Container port changes  
+         * Health endpoint changes  
+         * Environment variable changes  
+         * Secrets changes  
+         * Startup command changes  
 
-Step 4: Validate ALB Health Check Configuration
-Reason:  Deployment may have changed the application path/port.
-AWS CLI: aws elbv2 describe-target-groups --target-group-arns <TARGET_GROUP_ARN>
-Check:   * Health check path
-         * Health check port
-         * Matcher (200, 301, etc)
-         * Interval
-         * Timeout
+Step 4: Validate ALB Health Check Configuration  
+Reason:  Deployment may have changed the application path/port.  
+AWS CLI: aws elbv2 describe-target-groups --target-group-arns <TARGET_GROUP_ARN>  
+Check:   * Health check path  
+         * Health check port  
+         * Matcher (200, 301, etc)  
+         * Interval  
+         * Timeout  
 
-Step 5: Verify Port Mappings
-Reason:  most common post-deployment issues is a mismatched ECS container port, Application listening port, or Target group port.
-AWS CLI: aws ecs describe-task-definition --task-defnition my-task:42
-Example: "portMappings": [
-           {
-             "containerPort": 3000
-           }
-         ]
-Check:   application actually listens on:
-         netstat -tulpn
-         or
-         ss -tulpn
-Expected: 0.0.0.0:3000
+Step 5: Verify Port Mappings  
+Reason:  most common post-deployment issues is a mismatched ECS container port, Application listening port, or Target group port.  
+AWS CLI: aws ecs describe-task-definition --task-defnition my-task:42  
+Example: "portMappings": [  
+           {  
+             "containerPort": 3000  
+           }  
+         ]  
+Check:   application actually listens on:  
+         netstat -tulpn  
+Expected: 0.0.0.0:3000  
 
-Step 6: Check Security Groups:
-Reason:  Tasks may be healthy internally but unreachable from ALB.
-ALB Security Group: Must allow Inbound - 80/443 from internet
-ECS Task Security group: Must allow Inbound - Application port source (ALB Security group)
-AWS CLI: aws ec2 describe-security-groups --group-ids sg-xxxx
-Check:   * ALB SG > ECS SG allowed
-         * No recent changes
+Step 6: Check Security Groups:  
+Reason:  Tasks may be healthy internally but unreachable from ALB.  
+ALB Security Group: Must allow Inbound - 80/443 from internet  
+ECS Task Security group: Must allow Inbound - Application port source (ALB Security group)  
+AWS CLI: aws ec2 describe-security-groups --group-ids sg-xxxx  
+Check:   * ALB SG > ECS SG allowed  
+         * No recent changes  
 
-Step 7: Check ALB Access Logs
-Reason: Confirms exactly why requests fail. Enables ALB access logs if not already enabled.
-Check:  target_status_code
-        elb_status_code
-Examples: 503 - TargetConnectionError
-       or 503 - NoHealthyTargets
-These immediately narrow the investigation.
+Step 7: Check ALB Access Logs  
+Reason: Confirms exactly why requests fail. Enables ALB access logs if not already enabled.  
+Check:  target_status_code  
+        elb_status_code  
+Examples: 503 - TargetConnectionError  
+       or 503 - NoHealthyTargets  
+These immediately narrow the investigation.  
 
-Step 8: Inspect ECS Task Networking
-Reason:  Fargate uses aws vpc networking. Deployment may have altered: * Subnets
-                                                                       * Route tables
-                                                                       * Security groups
-AWS CLI: aws ecs describe-tasks --cluster my-cluster --tasks <TASK_ID>
-Check:   * Correct subnet
-         * Correct security group
-         * ENI attached successfully
+Step 8: Inspect ECS Task Networking  
+Reason:  Fargate uses aws vpc networking. Deployment may have altered: * Subnets  
+                                                                       * Route tables  
+                                                                       * Security groups  
+AWS CLI: aws ecs describe-tasks --cluster my-cluster --tasks <TASK_ID>  
+Check:   * Correct subnet  
+         * Correct security group  
+         * ENI attached successfully  
 
-Step 9: Validate Application Readiness
-Reason:  Container may start successfully but not actually be ready
-         ECS = Running, but ALB health check fail intermittently
-AWS CLI: aws logs tail /ecs/my-app --follow
-Check:   * Slow startup
-         * Database connection delays
-         * Dependancy initialization failures
+Step 9: Validate Application Readiness  
+Reason:  Container may start successfully but not actually be ready  
+         ECS = Running, but ALB health check fail intermittently  
+AWS CLI: aws logs tail /ecs/my-app --follow  
+Check:   * Slow startup  
+         * Database connection delays  
+         * Dependancy initialization failures  
          
 ─────────────────────────────────────────────────────────────────────────────────────────
 
-2. Pausible Root Causes
-Root Cause 1: Health Check Endpoint Changed
-Example: Before Deployment: /health
-         After Deployment: /api/health
-         ALB still checks old path
-Confirm: curl http://TASK_IP:3000/health
-         404 Not Found
-Fix:     Update target group health check path
+2. Pausible Root Causes  
+Root Cause 1: Health Check Endpoint Changed  
+Example: Before Deployment: /health  
+         After Deployment: /api/health  
+         ALB still checks old path  
+Confirm: curl http://TASK_IP:3000/health  
+         404 Not Found  
+Fix:     Update target group health check path  
 
-Root Cause 2: Container Listening on Wrong Port
-Example: Old version: 3000
-         New Version: 8080
-         Task definition still points to 3000
-Confirm: Check: ss -tulpn
-Fix:     Update task definition and redeploy
+Root Cause 2: Container Listening on Wrong Port  
+Example: Old version: 3000  
+         New Version: 8080  
+         Task definition still points to 3000  
+Confirm: Check: ss -tulpn  
+Fix:     Update task definition and redeploy  
 
-Root Cause 3: Security Group Misconfiguration
-Example: Recent deployment changes ECS service security group
-         ALB can no longer reach task ENIs.
-Confirm: Review SG rules.
-         Test connectivity:
-         telnet TASK_IP 3000
-Fix:     Allow inbound traffic from ALB security group
+Root Cause 3: Security Group Misconfiguration  
+Example: Recent deployment changes ECS service security group  
+         ALB can no longer reach task ENIs.  
+Confirm: Review SG rules.  
+         Test connectivity:  
+         telnet TASK_IP 3000  
+Fix:     Allow inbound traffic from ALB security group  
 
-Root Cause 4: Application Not Ready Before Traffic
-Example: Container startup: Container RUNNING after 10 sec
-                            App ready after 60 sec
-         ALB starts health checks too early.
-Confirm: * Compare Task launch timestamps
-         * Compare Health check failures
-         * Compare Startup logs
-Fix: * Increase Health check grace period
-     * Health check timeout
-     * Startup readiness handling
+Root Cause 4: Application Not Ready Before Traffic  
+Example: Container startup: Container RUNNING after 10 sec  
+                            App ready after 60 sec  
+         ALB starts health checks too early.  
+Confirm: * Compare Task launch timestamps  
+         * Compare Health check failures  
+         * Compare Startup logs  
+Fix: * Increase Health check grace period  
+     * Health check timeout  
+     * Startup readiness handling  
 
 ─────────────────────────────────────────────────────────────────────────────────────────
 
-3. RollBack Procedure for Redeploy Previous ECR Image
-* Identify known-good image: aws ecr describe-images --repository-name my-app
-* Update task definition to use previous image tag.
-* Register new version: aws ecs register-task-definition
-* Deploy revision.
+3. RollBack Procedure for Redeploy Previous ECR Image  
+* Identify known-good image: aws ecr describe-images --repository-name my-app 
+* Update task definition to use previous image tag.  
+* Register new version: aws ecs register-task-definition  
+* Deploy revision.  
