@@ -1,6 +1,6 @@
 # Round-3--Assessment
 ───────────────────────────────────────────────────────────────────────────────────────────
-TASK 1 — AWS Infrastructure & Cost Optimization
+# TASK 1 — AWS Infrastructure & Cost Optimization
 ───────────────────────────────────────────────────────────────────────────────────────────
 Your team has a staging environment on AWS running 24/7 with ECS Fargate services, an RDS instance, and an ALB. The monthly bill has crossed $600 and your manager wants it cut by at least 40% without breaking the environment.
 
@@ -9,6 +9,7 @@ Deliverable:
 * A short written list (5–7 points) of additional cost optimisation steps across ECS, ALB, and data transfer
 
 ───────────────────────────────────────────────────────────────────────────────────────────
+
 Solution:
 Auto Start/Stop Schedule for the RDS:
 *Shell script (AWS CLI) is executed from a scheduled EC2 instance or CI/CD pipeline.
@@ -37,7 +38,9 @@ Stop every weekday @8PM:
 0 20 * * 1 -5 /stop-rds.sh
 Stop Friday night and keep stopped through weekend:
 0 20 * * 5 /stop-rds.sh
+
 ───────────────────────────────────────────────────────────────────────────────────────────
+
 Additional Cost Optimization Steps:
 
 1.	Scale ECS Fargate Tasks by Schedule and Run fewer tasks during non-working hours:
@@ -56,7 +59,9 @@ Use VPC endpoints,
 Minimize NAT Gateway usage.
 7.	Enable Log retention policies as CloudWatch logs often grow unnoticed:
 Reduces log storage costs
+
 ────────────────────────────────────────────────────────────────────────────────────────
+
 Expected Cost Reduction Summary:
 Optimisation              Saving
 RDS schedule stop/start    15%
@@ -71,7 +76,7 @@ Combined saving can realistically exceed the required 40% cut in cost without br
 
 
 ───────────────────────────────────────────────────────────────────────────────────────────
-TASK 2 — CI/CD Pipeline Design
+# TASK 2 — CI/CD Pipeline Design
 ───────────────────────────────────────────────────────────────────────────────────────────
 Scenario:
 A Node.js backend application is currently deployed manually via SSH. A GitHub repo, ECR registry, and ECS Fargate cluster are already in place. You've been asked to set up a proper CI/CD pipeline from scratch.
@@ -84,6 +89,7 @@ A working GitHub Actions YAML file that:
 * Includes inline comments explaining each step
 
 ───────────────────────────────────────────────────────────────────────────────────────────
+
 Solution:
 File: .github/workflows/deploy.yml
 
@@ -157,7 +163,7 @@ File: .github/workflows/deploy.yml
 
 
 ───────────────────────────────────────────────────────────────────────────────────────────
-TASK 3 — Incident Troubleshooting (Containers + Networking)
+# TASK 3 — Incident Troubleshooting (Containers + Networking)
 ───────────────────────────────────────────────────────────────────────────────────────────
 Scenario:
 A containerised application on ECS Fargate is returning 503 Service Unavailable intermittently via the ALB. Tasks show as RUNNING, CloudWatch shows no CPU/memory spikes, and app logs look clean. The issue started after a recent deployment.
@@ -170,6 +176,7 @@ A step-by-step troubleshooting runbook covering:
 * How you'd roll back if needed
 
 ───────────────────────────────────────────────────────────────────────────────────────────
+
 Solution:
 1. Initial Triage - Where to look first:
    Since the issue appeared immidiately after the deployment and tasks remain healthy from an ECS perspective, the first sus is:
@@ -186,6 +193,7 @@ Solution:
    * Traffic routing is inconsistent
 
 ───────────────────────────────────────────────────────────────────────────────────────────
+
 Step 1: Check ALB Target Health
 Reason:  An ALB returns 503 when it has no healthy targets available for a request
 AWS CLI: aws elbv2 describe-target-health --target-group-arn <TARGET_GROUP_ARN>
@@ -269,7 +277,48 @@ AWS CLI: aws logs tail /ecs/my-app --follow
 Check:   * Slow startup
          * Database connection delays
          * Dependancy initialization failures
-
+         
 ───────────────────────────────────────────────────────────────────────────────────────────
+
 2. Pausible Root Causes
 Root Cause 1: Health Check Endpoint Changed
+Example: Before Deployment: /health
+         After Deployment: /api/health
+         ALB still checks old path
+Confirm: curl http://TASK_IP:3000/health
+         404 Not Found
+Fix:     Update target group health check path
+
+Root Cause 2: Container Listening on Wrong Port
+Example: Old version: 3000
+         New Version: 8080
+         Task definition still points to 3000
+Confirm: Check: ss -tulpn
+Fix:     Update task definition and redeploy
+
+Root Cause 3: Security Group Misconfiguration
+Example: Recent deployment changes ECS service security group
+         ALB can no longer reach task ENIs.
+Confirm: Review SG rules.
+         Test connectivity:
+         telnet TASK_IP 3000
+Fix:     Allow inbound traffic from ALB security group
+
+Root Cause 4: Application Not Ready Before Traffic
+Example: Container startup: Container RUNNING after 10 sec
+                            App ready after 60 sec
+         ALB starts health checks too early.
+Confirm: * Compare Task launch timestamps
+         * Compare Health check failures
+         * Compare Startup logs
+Fix: * Increase Health check grace period
+     * Health check timeout
+     * Startup readiness handling
+
+───────────────────────────────────────────────────────────────────────────────────────────
+
+3. RollBack Procedure for Redeploy Previous ECR Image
+* Identify known-good image: aws ecr describe-images --repository-name my-app
+* Update task definition to use previous image tag.
+* Register new version: aws ecs register-task-definition
+* Deploy revision.
