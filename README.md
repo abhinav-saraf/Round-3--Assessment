@@ -57,8 +57,6 @@ Eliminates duplicate ALB charges and reduces LCU costs.
 Keep ECS and RDS in the same AZ when acceptable for staging,  
 Use VPC endpoints,  
 Minimize NAT Gateway usage.
-7.	Enable Log retention policies as CloudWatch logs often grow unnoticed:  
-Reduces log storage costs
 
 ──────────────────────────────────────────────────────────────────────────────────────
 
@@ -70,7 +68,6 @@ Fargate Spot |              10%
 Right-sizing ECS resources | 10%  
 ALB consolidation	       | 2%  
 Data transfer optimisation | 2%  
-Log retention cleanup      | 1%  
 
 Combined saving can realistically exceed the required 40% cut in cost without breaking the current staging environment during working hours.
 
@@ -114,7 +111,7 @@ File: .github/workflows/deploy.yml
         
         steps:
           
-          # Step 1: Download 	repository source code
+          # Step 1: Download repository source code
           - name: Checkout source code
             uses: actions/checkout@v4
             
